@@ -1,0 +1,151 @@
+Build a simple YouTube video downloader using Python and Django
+
+In this post, we will make a simple YouTube video downloader. We will use Python to download the video and present it as a simple website using Django. We can
+do this in few lines of Python code, basic HTML and Django.
+
+What we need?
+pytube: We will be using pytube library. 'pytube' (https://pytube.io/en/latest/) is a lightweight, Pythonic, dependency-free, library (and command-line utility) for downloading YouTube Videos.
+
+Django: Django (https://www.djangoproject.com/) is a high-level Python web framework that encourages rapid development and clean, pragmatic design. Built by experienced developers, it takes care of much of the hassle of web development, so you can focus on writing your app without needing to reinvent the wheel. It’s free and open source. 
+
+Project SetUp:
+To install the libraries in separate folder, create a virtual environment.
+
+$ py -3 -m venv env
+
+Now activate the environment:
+$ .\env\Scripts\activate 
+
+(This project is done on Windows machine)
+
+We can now install the libraries in the env.
+$ pip install django
+$ pip install pytube
+
+We can now start creating our project. 
+
+1/ It is time to create our project. To create the project run the following command. It will create a project named 'YTVdownloader'
+$ django-admin startproject YTVdownloader 
+
+$ cd YTVdownloader
+
+2/ Let's create the video downloader application in our project. 
+$ python manage.py startapp YTVapp
+
+We need to add our app in INSTALLED_APPS list in the settings.py
+
+'''
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'YTVapp',  # our app
+]
+'''
+
+3/ Go to views.py. Create a function that receives the video link and download video from that link. We need to import YouTube function from pytube.
+
+'''
+
+
+from django.shortcuts import render
+from pytube import YouTube
+
+def index(request):
+
+	try:
+		
+		# check request.method is post or not
+		if request.method == 'POST':
+			try:
+				# get link from the html form
+				link = request.POST['link']
+				video = YouTube(link)
+
+				# set video resolution
+				stream = video.streams.get_lowest_resolution()
+				
+				# download the video 
+				stream.download()
+
+				# render HTML page
+				return render(request, 'index.html', {'msg':'Video downloaded'})
+			except:
+				return render(request, 'index.html', {'msg':'Video not downloaded'})
+		return render(request, 'index.html', {'msg':''})
+	except:
+		return render(request, "index.html", {"msg":"Sorry something went wrong!"})
+'''
+
+
+4/ To define how to display it to the users, we will need a HTML file. 
+
+First, create a 'templates' folder inside 'YTVapp'. 
+
+Inside the templates folder, we will create 'index.html' file where user can enter the url from YouTube to download the video. To do this we will use Django's POST method using csrf token for security.
+'''
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .container {
+            text-align: center;
+        }
+        
+        .form {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Youtube video downloader</h1>
+
+        <p>{{msg}}</p>
+
+        <form action="" method="post" class="form">
+            {% csrf_token %}
+
+            <label for="link">Enter URL: </label>
+            <input type="text" id="link" name="link"><br><br>
+            <input type="submit" value="Download">
+        </form>
+    </div>
+
+</body>
+
+</html>
+'''
+
+
+
+5/ Now we will define the path or map urls to views inside the urls.py
+'''
+from django.contrib import admin
+from django.urls import path
+from YTVapp import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+	path('admin/', admin.site.urls),
+	
+]
+
+'''
+
+6/ We are all set to run our project:
+In the command line type: 
+$ python manage.py runserver
+
+Go to http://localhost:8000/youtube to check our YouTube video downloader.
+
+When you click on Download button a video will be downloaded in your Django project’s directory.
+
+
+https://www.geeksforgeeks.org/youtube-video-downloader-using-django/
