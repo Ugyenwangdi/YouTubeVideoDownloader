@@ -147,5 +147,3 @@ Go to http://localhost:8000/youtube to check our YouTube video downloader.
 
 When you click on Download button a video will be downloaded in your Django project’s directory.
 
-
-https://www.geeksforgeeks.org/youtube-video-downloader-using-django/
